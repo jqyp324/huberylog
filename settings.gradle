@@ -1,1 +1,1 @@
-include ':SampleLog'
+include ':SampleLog', ':huberyloglibrary'

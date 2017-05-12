@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/HuberyLog.iml" filepath="$PROJECT_DIR$/HuberyLog.iml" />
       <module fileurl="file://$PROJECT_DIR$/SampleLog/SampleLog.iml" filepath="$PROJECT_DIR$/SampleLog/SampleLog.iml" />
+      <module fileurl="file://$PROJECT_DIR$/huberyloglibrary/huberyloglibrary.iml" filepath="$PROJECT_DIR$/huberyloglibrary/huberyloglibrary.iml" />
     </modules>
   </component>
 </project>
