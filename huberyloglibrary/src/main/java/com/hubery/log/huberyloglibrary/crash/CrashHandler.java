@@ -1,5 +1,8 @@
 package com.hubery.log.huberyloglibrary.crash;
 
+import com.hubery.log.huberyloglibrary.Logger;
+import com.hubery.log.huberyloglibrary.iLog;
+
 /**
  * Created by hubery on 17/5/12.
  * email: jqyp324@foxmail.com
@@ -50,13 +53,14 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         }
         StringBuffer exceptionStr = new StringBuffer();
         exceptionStr.append(ex.getMessage());
+        StackTraceElement[] elements = ex.getStackTrace();
         if (null != ex.getStackTrace() && ex.getStackTrace().length > 0) {
-            StackTraceElement[] elements = ex.getStackTrace();
             for (int i = 0; i < elements.length; i++) {
                 exceptionStr.append(elements[i].toString());
             }
         }
-
+        String[] tags = Logger.generateTag(elements[0]);
+        iLog.e(tags[1],tags[0] + ":" + exceptionStr.toString());
         return true;
     }
 

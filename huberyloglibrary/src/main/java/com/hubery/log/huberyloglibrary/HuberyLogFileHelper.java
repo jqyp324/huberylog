@@ -24,27 +24,27 @@ import java.util.regex.Pattern;
  * email: jqyp324@foxmail.com
  * github: https://github.com/jqyp324/huberylog.git
  */
-public class WoodyLogFileHelper {
+public class HuberyLogFileHelper {
 
-    private static final String TAG = "WoodyLogFileHelper";
+    private static final String TAG = "HuberyLogFileHelper";
 
-    private static WoodyLogFileHelper mInstance;
+    private static HuberyLogFileHelper mInstance;
 
     public static final SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyyMMdd");
 
     private static final String _regexp = "[0-9]{8}\\.log$";
 
-    private WoodyLogFileHelper() {
+    private HuberyLogFileHelper() {
 
     }
 
-    private WoodyLogFileHelper(Context context) {
+    private HuberyLogFileHelper(Context context) {
 
     }
 
-    public synchronized static WoodyLogFileHelper getInstance() {
+    public synchronized static HuberyLogFileHelper getInstance() {
         if (mInstance == null) {
-            mInstance = new WoodyLogFileHelper();
+            mInstance = new HuberyLogFileHelper();
         }
         return mInstance;
     }

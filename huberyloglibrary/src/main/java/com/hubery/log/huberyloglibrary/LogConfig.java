@@ -4,7 +4,8 @@ import android.content.Context;
 import android.os.Environment;
 import android.text.TextUtils;
 
-import com.hubery.log.huberyloglibrary.utils.WoodyLogSharedPreference;
+import com.hubery.log.huberyloglibrary.crash.CrashHandler;
+import com.hubery.log.huberyloglibrary.utils.HuberyLogSharedPreference;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,8 +35,8 @@ public class LogConfig {
     /**
      * 单个文件大小限制
      */
-    public static long LOG_MAXSIZE = 5 * 1024 * 1024;
-    public static final long MAXLOGSIZE = 7*1024*1024;//限制最大文件大小为7M
+    public static long LOG_MAXSIZE = 2 * 1024 * 1024;//默认为5M
+    public static final long MAXLOGSIZE = 5*1024*1024;//限制最大文件大小为7M
     /**
      * 日志文件后缀
      */
@@ -47,23 +48,32 @@ public class LogConfig {
 
     private static Context mContext;
 
-    public static void init(Context context) {
-        init(context, true);
-    }
-
-    public static void init(Context context, boolean allowShowLog) {
+    /**
+     *
+     * @param context
+     * @param allowShowLog 是否允许控制台输出日志
+     * @param allowWirteFile 是否允许记录写入文件
+     */
+    public static void init(Context context,boolean allowShowLog,boolean allowWirteFile){
         mContext = context;
         mConfigAllowConsoleLog = allowShowLog;
-//        initLogManager(context);
-//        CrashHandler crashHandler = CrashHandler.getInstance();
-//        crashHandler.init();
-//        checkLogFileNums();
+        mConfigWriteLog = allowWirteFile;
+        initLogManager(context);
+        checkLogFileNums();
+    }
+
+    /**
+     * catch crash日志
+     */
+    public static void addCatchCrash() {
+        CrashHandler crashHandler = CrashHandler.getInstance();
+        crashHandler.init();
     }
 
 
     /**
      * @param fileMaxSize eg: 1*1024*1024
-     * 设置文件最大不超过7M
+     * 设置文件最大不超过5M
      */
     public static void setLogFileMaxSize(long fileMaxSize) {
         if (fileMaxSize <= 0 || fileMaxSize > MAXLOGSIZE) {
@@ -72,7 +82,7 @@ public class LogConfig {
         LOG_MAXSIZE = fileMaxSize;
     }
 
-    public static Context getWoodyContext() {
+    public static Context getContext() {
         return mContext;
     }
 
@@ -104,8 +114,8 @@ public class LogConfig {
         if (!TextUtils.isEmpty(LOG_PAHT)) {
             return;
         }
-        if (!TextUtils.isEmpty(WoodyLogSharedPreference.getWoodyPath(mContext))) {
-            LOG_PAHT = WoodyLogSharedPreference.getWoodyPath(mContext);
+        if (!TextUtils.isEmpty(HuberyLogSharedPreference.getHeberyLogPath(mContext))) {
+            LOG_PAHT = HuberyLogSharedPreference.getHeberyLogPath(mContext);
             return;
         }
 
@@ -118,18 +128,18 @@ public class LogConfig {
         if (!mDir.exists()) {
             mDir.mkdir();
         }
-        WoodyLogSharedPreference.setWoodyPath(mContext, LOG_PAHT);
+        HuberyLogSharedPreference.setHeburyLogPath(mContext, LOG_PAHT);
     }
 
     /**
      * 初始化时检测文件数量
      */
     private static void checkLogFileNums() {
-        File[] currentLogList = WoodyLogFileHelper.getInstance().getLocalLogFileNums();
+        File[] currentLogList = HuberyLogFileHelper.getInstance().getLocalLogFileNums();
         try {
             if (null != currentLogList && currentLogList.length > getLogMaxnums()) {
                 for (int i = 0; i < currentLogList.length - getLogMaxnums(); i++) {
-                    WoodyLogFileHelper.getInstance().deleteProcessLogFile(currentLogList[i]);
+                    HuberyLogFileHelper.getInstance().deleteProcessLogFile(currentLogList[i]);
                 }
             }
         } catch (Exception e) {
@@ -144,7 +154,7 @@ public class LogConfig {
     public static List<String> getLocalLogDate() {
         List<String> mList = new ArrayList<String>();
         try {
-            String[] fileNames = WoodyLogFileHelper.getInstance().getLocalLogNames();
+            String[] fileNames = HuberyLogFileHelper.getInstance().getLocalLogNames();
             if (null != fileNames && fileNames.length > 0) {
                 for (int i = fileNames.length - 1; i >= 0; i--) {
                     if(!TextUtils.isEmpty(fileNames[i])){
@@ -153,7 +163,7 @@ public class LogConfig {
                 }
             }
         } catch (Exception e) {
-            mList = Arrays.asList(WoodyLogFileHelper.getInstance().getLocalLogNames());
+            mList = Arrays.asList(HuberyLogFileHelper.getInstance().getLocalLogNames());
         }
         return mList;
     }
@@ -166,7 +176,7 @@ public class LogConfig {
     public static long getLogFileSize(List<String> mList){
         long fileSize = 0;
         if(null != mList && mList.size() > 0){
-            fileSize = WoodyLogFileHelper.getInstance().getLogFileSize(mList);
+            fileSize = HuberyLogFileHelper.getInstance().getLogFileSize(mList);
         }
         return fileSize;
     }
@@ -178,7 +188,7 @@ public class LogConfig {
     public static long getTodayFileSize(){
         long fileSize = 0;
         try {
-            fileSize = WoodyLogFileHelper.getInstance().getTodayFileSize();
+            fileSize = HuberyLogFileHelper.getInstance().getTodayFileSize();
             return fileSize;
         } catch (Exception e) {
             return 0;

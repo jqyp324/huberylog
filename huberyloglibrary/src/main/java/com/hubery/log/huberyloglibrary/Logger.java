@@ -1,9 +1,13 @@
 package com.hubery.log.huberyloglibrary;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
+import com.hubery.log.huberyloglibrary.permission.LogPermissionActivity;
 import com.hubery.log.huberyloglibrary.utils.ArrayUtil;
 import com.hubery.log.huberyloglibrary.utils.SystemUtil;
 
@@ -11,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -23,31 +28,31 @@ import java.util.Set;
  */
 public final class Logger implements Printer {
 
+    public static final SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+
     protected Logger() {
 
     }
 
     /**
-     *
      * @param type
      * @param element
      * @param msg
      */
     private void logString(LogType type, StackTraceElement element, String msg) {
         String[] tags = generateTag(element);
-        outConsole(type,tags[1],tags[0],msg);//console打印
-//        writeLog(type,tags[1],msg);//写入日志
+        outConsole(type, tags[1], tags[0], msg);//console打印
+        writeLog(tags[1], tags[0] + msg);//写入日志
     }
 
     /**
-     *
      * @param type
      * @param tag
      * @param msg
      */
-    private void logString(LogType type, String tag,String msg) {
-        outConsole(type,tag,msg);//console打印
-//        writeLog(type,tag,msg);//写入日志
+    private void logString(LogType type, String tag, String msg) {
+        outConsole(type, tag, msg);//console打印
+        writeLog(tag, msg);//写入日志
     }
 
     private void logObject(LogType type, String tag, Object object) {
@@ -57,7 +62,7 @@ public final class Logger implements Printer {
             if (object instanceof Throwable) {
                 logString(type, tag, object.toString());
             } else if (object instanceof String) {
-                logString(type, tag,(String) object);
+                logString(type, tag, (String) object);
             } else if (object.getClass().isArray()) {
                 String msg = "Temporarily not support more than two dimensional Array!";
                 int dim = ArrayUtil.getArrayDimension(object);
@@ -91,7 +96,7 @@ public final class Logger implements Printer {
                                 flag++ < collection.size() - 1 ? ",\n" : "\n");
                     }
                 }
-                logString(type, tag,msg + "\n]");
+                logString(type, tag, msg + "\n]");
             } else if (object instanceof Map) {
                 String msg = simpleName + " {\n";
                 Map<Object, Object> map = (Map<Object, Object>) object;
@@ -102,15 +107,15 @@ public final class Logger implements Printer {
                     msg += String.format(itemString, SystemUtil.objectToString(key),
                             SystemUtil.objectToString(value));
                 }
-                logString(type, tag,msg + "}");
+                logString(type, tag, msg + "}");
             } else if (object instanceof JSONArray || object instanceof JSONObject) {
                 String msg = json(object.toString());
-                logString(type, tag,msg);
+                logString(type, tag, msg);
             } else {
                 logString(type, tag, SystemUtil.objectToString(object));
             }
         } else {
-            logString(type, tag,SystemUtil.objectToString(object));
+            logString(type, tag, SystemUtil.objectToString(object));
         }
     }
 
@@ -124,9 +129,9 @@ public final class Logger implements Printer {
         if (object != null) {
             final String simpleName = object.getClass().getSimpleName();
             if (object instanceof Throwable) {
-                logString(type, element,object.toString());
+                logString(type, element, object.toString());
             } else if (object instanceof String) {
-                logString(type, element,(String) object);
+                logString(type, element, (String) object);
             } else if (object.getClass().isArray()) {
                 String msg = "Temporarily not support more than two dimensional Array!";
                 int dim = ArrayUtil.getArrayDimension(object);
@@ -145,7 +150,7 @@ public final class Logger implements Printer {
                     default:
                         break;
                 }
-                logString(type, element,msg + "}");
+                logString(type, element, msg + "}");
             } else if (object instanceof Collection) {
                 Collection collection = (Collection) object;
                 String msg = "%s size = %d [\n";
@@ -160,7 +165,7 @@ public final class Logger implements Printer {
                                 flag++ < collection.size() - 1 ? ",\n" : "\n");
                     }
                 }
-                logString(type, element,msg + "\n]");
+                logString(type, element, msg + "\n]");
             } else if (object instanceof Map) {
                 String msg = simpleName + " {\n";
                 Map<Object, Object> map = (Map<Object, Object>) object;
@@ -188,7 +193,7 @@ public final class Logger implements Printer {
      *
      * @return
      */
-    private String[] generateTag(StackTraceElement caller) {
+    public static String[] generateTag(StackTraceElement caller) {
         String[] tags = new String[2];
         tags[0] = "%s.%s%s";
         String stackTrace = caller.toString();
@@ -203,45 +208,43 @@ public final class Logger implements Printer {
         return tags;
     }
 
-    private static void outConsole(LogType type,String tag,String value,String msg){
-
-        if (LogConfig.mConfigAllowConsoleLog) {
-            if(!TextUtils.isEmpty(value)){
-                String contentStr = value + ":" + msg;
-                outConsole(type,tag,contentStr);
-            }else{
-                outConsole(type,tag,msg);
-            }
+    private static void outConsole(LogType type, String tag, String msgLineInfo, String msg) {
+        if (!TextUtils.isEmpty(msgLineInfo)) {
+            String contentStr = msgLineInfo + ":" + msg;
+            outConsole(type, tag, contentStr);
+        } else {
+            outConsole(type, tag, msg);
         }
-
     }
 
-    private static void outConsole(LogType type,String tag,String contentStr){
-        if(type == LogType.Verbose){
+    private static void outConsole(LogType type, String tag, String contentStr) {
+        if (type == LogType.Verbose) {
             Log.v(tag, contentStr);
-        }else if((type == LogType.Debug)){
+        } else if ((type == LogType.Debug)) {
             Log.d(tag, contentStr);
-        }else if((type == LogType.Error)){
+        } else if ((type == LogType.Error)) {
             Log.e(tag, contentStr);
-        }else if((type == LogType.Info)){
+        } else if ((type == LogType.Info)) {
             Log.i(tag, contentStr);
-        }else if((type == LogType.Warn)){
+        } else if ((type == LogType.Warn)) {
             Log.w(tag, contentStr);
         }
     }
 
-    private static void writeLog(LogType type,String msg){
-//        if (IhumanLogConfig.mConfigWriteLog){
-//            String logType = "NOTICE";
-//            if (type == LogType.Info){
-//                logType = "TRACE";
-//            }
-//            if(!LogErrorNo.DEFAULT.value.equals(errorNo)){
-//                logType = "ERROR";
-//            }
-//            String log = createTraceLog(logType,subSysModel,modle,url,request,operator,errorNo,msg);
-//            WoodyLogFileHelper.getInstance().saveLogFile(log);
-//        }
+    private static void writeLog(String tag, String msg) {
+        if (LogConfig.mConfigWriteLog) {
+            // 版本判断。当手机系统大于 23 时，才有必要去判断权限是否获取
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                int i = LogConfig.getContext().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                // 权限是否已经 授权 GRANTED---授权  DINIED---拒绝
+                if (i != PackageManager.PERMISSION_GRANTED) {
+                    LogPermissionActivity.launch(LogConfig.getContext(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE});
+                }
+            }
+            //// TODO: 17/5/15
+            String log =  mDateFormat.format(new java.util.Date()) + "-->" + tag + ":" + msg;
+            HuberyLogFileHelper.getInstance().saveLogFile(log);
+        }
     }
 
     public String json(String json) {
@@ -265,56 +268,74 @@ public final class Logger implements Printer {
     }
 
 
-
-
     @Override
-    public void d(StackTraceElement element,Object message) {
-        logObject(LogType.Debug, element, message);
+    public void d(StackTraceElement element, Object message) {
+        if (LogConfig.mConfigAllowConsoleLog) {
+            logObject(LogType.Debug, element, message);
+        }
     }
 
     @Override
-    public void e(StackTraceElement element,Object message) {
-        logObject(LogType.Error, element,message);
+    public void e(StackTraceElement element, Object message) {
+        if (LogConfig.mConfigAllowConsoleLog) {
+            logObject(LogType.Error, element, message);
+        }
     }
 
     @Override
-    public void w(StackTraceElement element,Object message) {
-        logObject(LogType.Warn, element, message);
+    public void w(StackTraceElement element, Object message) {
+        if (LogConfig.mConfigAllowConsoleLog) {
+            logObject(LogType.Warn, element, message);
+        }
     }
 
     @Override
-    public void i(StackTraceElement element,Object message) {
-        logObject(LogType.Info, element,message);
+    public void i(StackTraceElement element, Object message) {
+        if (LogConfig.mConfigAllowConsoleLog) {
+            logObject(LogType.Info, element, message);
+        }
     }
 
     @Override
     public void v(StackTraceElement element, Object message) {
-        logObject(LogType.Verbose, element, message);
+        if (LogConfig.mConfigAllowConsoleLog) {
+            logObject(LogType.Verbose, element, message);
+        }
     }
 
     @Override
-    public void v(String tag,Object message) {
-        logObject(LogType.Verbose, tag,message);
+    public void v(String tag, Object message) {
+        if (LogConfig.mConfigAllowConsoleLog) {
+            logObject(LogType.Verbose, tag, message);
+        }
     }
 
     @Override
-    public void i(String tag,Object message) {
-        logObject(LogType.Info, tag,message);
+    public void i(String tag, Object message) {
+        if (LogConfig.mConfigAllowConsoleLog) {
+            logObject(LogType.Info, tag, message);
+        }
     }
 
     @Override
-    public void d(String tag,Object message) {
-        logObject(LogType.Debug, tag,message);
+    public void d(String tag, Object message) {
+        if (LogConfig.mConfigAllowConsoleLog) {
+            logObject(LogType.Debug, tag, message);
+        }
     }
 
     @Override
     public void w(String tag, Object message) {
-        logObject(LogType.Warn, tag, message);
+        if (LogConfig.mConfigAllowConsoleLog) {
+            logObject(LogType.Warn, tag, message);
+        }
     }
 
     @Override
     public void e(String tag, Object message) {
-        logObject(LogType.Error, tag, message);
+        if (LogConfig.mConfigAllowConsoleLog) {
+            logObject(LogType.Error, tag, message);
+        }
     }
 
 }

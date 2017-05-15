@@ -17,7 +17,7 @@ import com.hubery.log.huberyloglibrary.LogConfig;
  */
 public final class MetaDataUtil {
 
-    private static String mAppId = "";
+
     private static String mAppVersionName = "";
 
     public static String UPLOADHOST = "";
@@ -31,10 +31,10 @@ public final class MetaDataUtil {
             return mAppVersionName;
         }
         try {
-            if (null != LogConfig.getWoodyContext()) {
+            if (null != LogConfig.getContext()) {
                 PackageInfo pinfo =
-                        LogConfig.getWoodyContext().getApplicationContext().getPackageManager()
-                                .getPackageInfo(LogConfig.getWoodyContext().getPackageName(), PackageManager.GET_CONFIGURATIONS);
+                        LogConfig.getContext().getApplicationContext().getPackageManager()
+                                .getPackageInfo(LogConfig.getContext().getPackageName(), PackageManager.GET_CONFIGURATIONS);
                 mAppVersionName = pinfo.versionName;
                 return mAppVersionName;
             }
