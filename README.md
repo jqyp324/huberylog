@@ -121,3 +121,7 @@ long size = LogConfig.getTodayFileSize()//获取当天文件大小
 
 
 android log tools,you can print object , write log file
+
+
+
+[![](https://jitpack.io/v/jqyp324/huberylog.svg)](https://jitpack.io/#jqyp324/huberylog)
