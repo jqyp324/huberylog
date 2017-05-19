@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="huberyloglibrary-1.0.0">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/SampleLog/build/intermediates/exploded-aar/com.hubery.log/huberyloglibrary/1.0.0/res" />
+      <root url="jar://$PROJECT_DIR$/SampleLog/build/intermediates/exploded-aar/com.hubery.log/huberyloglibrary/1.0.0/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar:///Applications/Android/ Studio.app/Contents/gradle/gradle-2.14.1/caches/modules-2/files-2.1/com.hubery.log/huberyloglibrary/1.0.0/d3c2dd030882e31e7bd82f54c9c2c94a537b437d/huberyloglibrary-1.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

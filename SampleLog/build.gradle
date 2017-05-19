@@ -20,6 +20,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':huberyloglibrary')
-//    compile 'com.hubery.log:huberyloglibrary:1.0.0'
+//    compile project(':huberyloglibrary')
+//    compile 'com.github.jqyp324:huberylog:1.0.1'
+    compile 'com.hubery.log:huberyloglibrary:1.0.0'
 }

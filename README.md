@@ -20,6 +20,36 @@
 
 1. 引入library
 
+   两种方式引入：
+
+   1）JCenter
+
+   ```xml
+   compile 'com.hubery.log:huberyloglibrary:1.0.0'
+   ```
+
+   2）jitpack
+
+   Add it in your root build.gradle at the end of repositories:
+
+   ```xml
+   allprojects {
+   		repositories {
+   			...
+   			maven { url 'https://jitpack.io' }
+   		}
+   	}
+
+   ```
+
+   Add the dependency
+
+   ```xml
+   dependencies {
+   	        compile 'com.github.jqyp324:huberylog:1.0.1'
+   	}
+   ```
+
 2. 选填(如果有写入文件的需求)，Mainfest加入以下权限
 
    ```xml
